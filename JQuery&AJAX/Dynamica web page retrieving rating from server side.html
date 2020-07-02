@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script>
+	//tags for autocomplete
+	var tagsSet = new Set(["KFC", "Subway", "Pizza Go Go", "McDonalds"]);
+	//initialising page pupulating first page and setting up buttons
+	$(document).ready(function(){
+		populateTable(1);
+		$.get("https://www.cs.kent.ac.uk/people/staff/sm951/co539/assessment2/hygiene.php?operation=pages", function(pages) {
+			$("#pageButtons").html("Pages:<br>");			
+			
+			for(var i = 1; i < pages["pages"] + 1; i++) {
+				$("#pageButtons").append("<button onClick='populateTable("+i+")'>"+i+"</button>");
+			};
+		});
+		//adding submit on form
+		$("#searchForm").submit(function(i) {
+			i.preventDefault();
+			getSearchResults($("#searchInput").val());
+		});
+		//initialising autocomplete and initial suggestions
+		$("#searchInput").autocomplete({
+			minLength: 0,
+			source: Array.from(tagsSet),
+			autoFocus: true
+		}).focus(function () {
+			$(this).autocomplete("search","");
+		});
+	});
+	//function to populate the table depending on the page number given
+	function populateTable(pageNr) {
+		$.get("https://www.cs.kent.ac.uk/people/staff/sm951/co539/assessment2/hygiene.php?operation=get&page="+pageNr+"", function(page) {
+			$("#dataTable").empty();
+			//build table top
+			$("#dataTable").html("<tr><th>Name</th><th>Address</th><th>Hygiene Rating</th><th>Date</th><th>Rating</th></tr>");
+			//build rows and cells for the table
+			$.each(page, function() {
+				$("tr:last-child").after("<tr><td>"+this["name"]+"</td><td>"+this["addressLine"]+"</td><td>"+this["hygieneRating"]+"</td><td>"+this["ratingDate"]+"</td><td><button id='"+this["fhrsId"]+"'>Get Rating</button></td></tr>");
+				var thisBusiness = this;
+				//adding click function to each button
+				$("#"+this['fhrsId']+"").click(function() {
+						getRating(thisBusiness);
+				});
+
+			});			
+		});
+			
+	};
+	
+	function getRating(businessInfo) {
+	
+		var moreThanOne = 0;
+		// checking if there is more than one element with same first address line 
+		$.get("https://www.cs.kent.ac.uk/people/staff/sm951/co539/assessment2/hygiene.php?operation=search&name="+businessInfo['name']+"", function(businessList) {			
+			//looping through addresses of given business name in hygiene
+			$.each(businessList, function() {
+					//getting first line of address from addressLine
+					var businessAddressHead = this['addressLine'].split(", ");
+					var businessAddressHead2 = businessInfo['addressLine'].split(", ");
+					//conveting to lower case and removing white space
+					var firstString = businessAddressHead[0].replace(/\s+/g, '').toLowerCase();										
+					var secondString = businessAddressHead2[0].replace(/\s+/g, '').toLowerCase();
+					//finding out the number of matches 
+					if(firstString.match(secondString)) {					
+						moreThanOne++;						
+					};					
+			});	
+							//if there is one address in match than the rating is retrieved trying to match vicinity with addressLine
+							if(moreThanOne == 1) {
+								$.get("https://www.cs.kent.ac.uk/people/staff/sm951/co539/assessment2/rating.php?name="+businessInfo['name']+"", function(results) {
+									var found = false;
+									//looping through results of given businees name in ratings
+									$.each(results, function() {
+										//getting first line of address from addressLine and vicinity
+										var addressHead = this["vicinity"].split(", ");				
+										var businessAddressHead = businessInfo['addressLine'].split(", ");
+										//conveting to lower case and removing white space
+										var firstString = businessAddressHead[0].replace(/\s+/g, '').toLowerCase();
+										var secondString = addressHead[0].replace(/\s+/g, '').toLowerCase();
+										//if there is a match rating is given in a pop up
+										if(firstString.match(secondString)) {					
+											alert(businessInfo['name']+" Rated at: "+this["rating"]);
+											found = true;
+											return;
+										};
+									});								
+									if(!found) {
+										alert(businessInfo['name'] + ": No rating for this place");
+									}
+								});
+							//if there is more or less than one address no rating is given
+							} else {
+								alert(businessInfo['name'] + ": No rating for this place");
+							}
+		});
+	};
+	//populates the table depending on the input string, also adds each name of results to tags for autocomplete
+	function getSearchResults(inputString) {
+		$.get("https://www.cs.kent.ac.uk/people/staff/sm951/co539/assessment2/hygiene.php?operation=search&name="+inputString+"", function(results) {
+			//build table top
+			$("#dataTable").html("<tr><th>Name</th><th>Address</th><th>Hygiene Rating</th><th>Date</th><th>Rating</th></tr>");
+			//build rows and cells for the table
+			$.each(results, function() {
+				$("tr:last-child").after("<tr><td>"+this["name"]+"</td><td>"+this["addressLine"]+"</td><td>"+this["hygieneRating"]+"</td><td>"+this["ratingDate"]+"</td><td><button id='"+this["fhrsId"]+"'>Get Rating</button></td></tr>");
+				var thisBusiness = this;
+				//adding click function to each button
+				$("#"+this['fhrsId']+"").click(function() {
+						getRating(thisBusiness);
+				});
+				//adds elemets for autocomplete
+				tagsSet.add(this["name"]);
+				console.log(tagsSet);
+			});
+			//updating autocomplete source
+			$("#searchInput").autocomplete("option", {
+						source: function(request, response) {
+								var results = $.ui.autocomplete.filter(Array.from(tagsSet), request.term);
+
+								response(results.slice(0, 10));
+							}
+			});
+		});	
+	}
+</script>
+<style>
+	body {
+		width: 960px;
+		margin:0 auto;
+	}
+	h2 {
+		font-style: italic;
+		font-size: 5vh;
+		text-align: center;
+		margin: 2vh;
+	}
+	#dataTable {
+		margin:2vh auto;
+	}
+	#searchBox {
+		padding: 2vh;
+	}
+	form {
+		width: 40vh;
+		margin:0 auto;
+	}
+	label {
+		font-size: 2vh;
+	}
+	table, th, td {
+		border-collapse: collapse;
+		border: 1px solid black;
+		padding: 0.5vh;
+	}
+	th {
+		font-size: 2vh;
+	}
+	button, input {
+		margin: 0.2vh;
+		border-radius: 0.3vh;
+	}
+</style>
+<title>Food Hygiene Ratings</title>
+</head>
+<body>
+	<h2>
+		Food Hygiene Ratings
+	</h2>
+	<div id="description">
+		<p>This website retrieves 20 businesses per page using $.get, the table 
+		is populated with the data and buttons are added depending on the data 
+		available from the server-side script. The user is able to get rating for
+		the business. Not all the businesses have rating. If the business has no
+		rating the pop-up message is given saying that, and if the rating is available
+		the pop up is given with relevant rating (retrieved from combining data from 2 
+		server-side scripts). Furthermore, the user is able to search for businesses by
+		inputting term into a search field, when search field is focused initial 4 
+		suggestions are given. Autocomplete suggestions are updated after each search 
+		with results received from that search (No duplicates).</p>
+	</div>
+	<table id="dataTable">
+	</table>
+	<div id="pageButtons">
+	</div>
+	<div id="searchBox">
+		<form id="searchForm">
+			<label for="searchInput">Business Name:</label>
+			<input id="searchInput" type="text">
+			<input type="submit" value="Find">
+		</form>
+	</div>
+</body>
+</html>

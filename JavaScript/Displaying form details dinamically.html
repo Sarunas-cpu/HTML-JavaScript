@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Question 3</title>
+<style>
+
+</style>
+<script>
+//adds data from inputs onto the page
+function addData() {
+	//array of inputs
+	var currentInputs = document.getElementsByTagName('input');
+	//input of eye color
+	var eyeColor = document.getElementById('eyeColor')
+	//string of outputs
+	var dataToString = "";
+	//generating output string by looping over inputs
+	for(i = 0; i < currentInputs.length; i++) {
+		dataToString += " " + currentInputs[i].value + " ";
+	}
+	//adding eyeColor to the string
+	dataToString += eyeColor.value + "<br><br />";
+	//putting data onto the page and the form is reset
+	document.getElementById('output').innerHTML += dataToString;
+	resetForm();
+}
+//reset the form
+function resetForm() {
+	document.getElementById('form').reset();
+}
+</script>
+</head>
+<body id="body">
+<!-- input form -->
+<form id="form" onSubmit="return false;">
+		<!-- first name input -->
+		<label for="fname">First Name:</label>
+		<input id="fname" type="text"/><br><br />
+		<!-- last name input -->
+		<label for="lname">Laset Name:</label>
+		<input id="lname" type="text"/><br><br />
+		<!-- date of birth input -->
+		<label for="dateOfbirth">Date of Birth:</label>
+		<input id="dateOfbirth" type="date"/><br><br />
+		<!-- eye color input drop down list -->
+		<label for="eyeColor">Eye color:</label>
+		<select id="eyeColor" name="eyeColor">
+			<option value="">-</option>
+			<option value="Blue">Blue</option>
+			<option value="Brown">Brown</option>
+			<option value="Green">Green</option>
+			<option value="Grey">Grey</option>
+			<option value="Other">Other</option>
+		</select><br><br />
+		<!-- button to reset form -->
+		<button type="button" onClick="resetForm()">Reset</button>
+		<!-- button to display data on the page from the form -->
+		<button type="button" onClick="addData()" >Display</button>
+</form>
+<!-- data from form is printed here -->
+<div id="output">
+</div>
+</body>
+</html>

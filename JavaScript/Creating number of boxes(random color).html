@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Question 1</title>
+<style>
+span {
+	width: 30px;
+	height: 30px;
+	border: 1px;
+	float: left;
+}
+</style>
+<script>
+/**
+	Remove all the elements from the container if there is any
+	Create number of boxes needed depending on the input
+	Double the margin left each time the box is created
+	Randomise the color for each box
+*/
+function createBoxes() {
+	//remove all the elements from the container
+	emptyContainer('container');	
+	//number of boxes needed to be created
+	var nrOfBoxesNeeded = parseInt(document.getElementById('nrOfBoxes').value);
+	//margin for each box
+	var marginLeft = 5;
+	//creating new boxes
+	for(i = 0; i < nrOfBoxesNeeded; i++) {
+		var newSpan = document.createElement('span');
+		//generating random color and applying to the newSpan
+		newSpan.style.backgroundColor = "rgb(" + Math.round(Math.random()*255) +", " + Math.round(Math.random()*255) + " ," + Math.round(Math.random()*255) + ")";
+		//applying margin to the newSpan
+		newSpan.style.margin = "5px " + marginLeft + "px" + " 5px 5px";
+		//creating new span in the container
+		document.getElementById('container').appendChild(newSpan);
+		//doubling the margin
+		marginLeft += marginLeft;
+	}	
+}
+//empties the container
+function emptyContainer(container) {
+	var container = document.getElementById(container);
+	//checking if the container has at least one node, if it does removes the node
+	while (container.childNodes[0]) {
+		container.removeChild(container.childNodes[0]);
+	}	
+}
+
+</script>
+</head>
+<body>
+<label>Enter the number of boxes to be created:</label>
+<!-- input box -->
+<input id="nrOfBoxes" type="text">
+<!-- button to add boxes to the screen -->
+<button id="addboxes" type="button" onClick="createBoxes()" >Create boxes</button>
+<!-- container to contain all the boxes created -->
+<div id="container">
+</div>
+</body>
+</html>

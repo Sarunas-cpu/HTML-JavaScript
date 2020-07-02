@@ -1,0 +1,90 @@
+#mainBody {
+	margin:auto;
+	width: 90vw;
+	padding: 1vw;
+	overflow: hidden;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+div.header {
+	background-color: yellow;
+	height: 5vw;
+	line-height: 5vw;
+	font-size: 3vw;
+	padding-left: 2vw;
+}
+
+div.sidebar {
+	background-color: red;
+	height: 100vw;
+	width: 15%;
+	font-size: 2vw;
+	padding: 3vw;
+	float: left;
+	
+}
+
+div.main {
+	background-color: green;
+	height: 100vw;
+	width: calc(85% - 3vw*2 - 3vw*2);
+	font-size: 2vw;
+	padding: 3vw;
+	float: left;
+
+}
+
+div.main2 {
+	background-color: green;
+	height: auto;
+	padding: 20vw;
+
+}
+
+table {
+	border: solid 0.2vw;
+	border-collapse: collapse;
+	margin: auto;
+	margin-top: 4vw;
+}
+
+th, td {
+	border: solid 0.1vw;
+	text-align: left;
+}
+
+img {
+	display: block;
+	height: 40%;
+	margin: auto;
+}
+
+ul {
+	padding: 3vw;
+	margin-top: auto;
+}
+
+a.button {
+	text-decoration: none;
+}
+
+a.button {
+	text-decoration: none;
+}
+
+div.button, div.button:hover, div.button:active {
+	border: solid 0.1vw;
+	width: 20vw;
+	height: 8vw;
+	font-size: 3vw;
+	margin: auto;
+	text-align: center;
+	line-height: 8vw;
+	background-color: red;
+}
+div.button:hover {
+	background-color: orange;
+}
+div.button:active {
+	background-color: purple;
+}

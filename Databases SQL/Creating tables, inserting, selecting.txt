@@ -1,0 +1,178 @@
+/*
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+Task 1
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+*/
+
+CREATE TABLE Student (
+ studentId 	INTEGER		PRIMARY KEY,
+ name	  	VARCHAR(255)	NOT NULL,
+ streetAddress	VARCHAR(255),
+ city 		VARCHAR(255),
+ postcode 	VARCHAR(255),
+ phoneNum 	VARCHAR(255)
+);
+
+INSERT INTO student VALUES (1, 'Sue Faffer', '12 Meryl Street', 'Canterbury', 'CT6 8UJ', '+44 1227-968-5287');
+INSERT INTO student VALUES (2, 'Chris Driver', '3a Carla Lane', 'Herne Bay', 'CT4 9KL', NULL);
+INSERT INTO student VALUES (3, 'Olive Kemp', '1 Cecil Road', 'Canterbury', 'CT6 8UJ', '01227871000 extension 105');
+INSERT INTO student VALUES (4, 'Sue Faffer', '14 Meryl Street', 'Canterbury', 'CT6 8UJ', '1227943979');
+
+
+CREATE TABLE Kitchen (
+ buildingName	VARCHAR(255),
+ roomNum	INTEGER,
+ PRIMARY KEY (buildingName, roomNum)
+);
+
+INSERT INTO Kitchen VALUES ('annex', 1);
+INSERT INTO Kitchen VALUES ('annex', 2);
+INSERT INTO Kitchen VALUES ('farm house', 1);
+INSERT INTO Kitchen VALUES ('farm house', 2);
+INSERT INTO Kitchen VALUES ('farm house', 3);
+
+
+CREATE TABLE Chef (
+ empId		CHAR(4)		PRIMARY KEY,
+ name	  	VARCHAR(255)	NOT NULL,  
+ phoneNum 	VARCHAR(255)	NOT NULL,
+ email		VARCHAR(255)	NOT NULL,
+ qualification	VARCHAR(255)	NOT NULL,
+ CONSTRAINT CHECK_QUALIFICATION CHECK(qualification IN('certificate', 'associate degree', 'bachelor', 'master', 'none'))
+);
+
+INSERT INTO Chef VALUES (1001, 'Sally Smith', '+44 1227 871 194', 'sas777@live.com', 'certificate');
+INSERT INTO Chef VALUES (1002, 'Ben Driver', '0779 601423', 'benny910@gmail.com', 'none');
+INSERT INTO Chef VALUES (1003, 'Jane Smith', '01227 8812061', 'jane814@live.com', 'certificate');
+
+
+CREATE TABLE Friend (
+ friendId		INTEGER		PRIMARY KEY,
+ name	  		VARCHAR(255)	NOT NULL,
+ email			VARCHAR(255),
+ dietaryConstraints 	VARCHAR(255)
+);
+
+INSERT INTO Friend VALUES (2, 'Yasser Crimp', 'y.crimp681@gmail.com', 'Allergic to Nuts');
+INSERT INTO Friend VALUES (1, 'Jane Smith', NULL, NULL);
+INSERT INTO Friend VALUES (3, 'Ben Blimp', 'bb@live.com', 'None');
+INSERT INTO Friend VALUES (5, 'Chris Driver', 'cd615@kent.ac.uk', 'No');
+INSERT INTO Friend VALUES (4, 'Jim Smith', 'smithy1972@gmail.com', 'Gluten free only');
+
+
+CREATE TABLE TrainingSession (
+ date		DATE,
+ time		TIME,
+ buildingName	VARCHAR(255),
+ roomNum	INTEGER,
+ studentId	INTEGER,
+ empId		CHAR(4),
+ PRIMARY KEY (date, time, buildingName, roomNum),
+ FOREIGN KEY (buildingName, roomNum) REFERENCES Kitchen(buildingName, roomNum),
+ FOREIGN KEY (studentId) REFERENCES Student(studentId),
+ FOREIGN KEY (empId) REFERENCES Chef(empId),
+ CONSTRAINT NO_SAME_STUDENT UNIQUE(date, time, studentId),
+ CONSTRAINT NO_SAME_EMPLOYEE UNIQUE(date, time, empId)
+);
+
+INSERT INTO TrainingSession VALUES ('10/01/2019', '10:00:00', 'farm house', 2, 1, 1001);
+INSERT INTO TrainingSession VALUES ('11/01/2019', '12:00:00', 'annex', 1, 1, 1001);
+INSERT INTO TrainingSession VALUES ('12/01/2019', '10:00:00', 'annex', 1, 1, 1002);
+INSERT INTO TrainingSession VALUES ('13/01/2019', '12:00:00', 'farm house', 2, 4, 1003);
+INSERT INTO TrainingSession VALUES ('05/02/2019', '10:00:00', 'farm house', 1, 1, 1003);
+INSERT INTO TrainingSession VALUES ('05/02/2019', '10:00:00', 'farm house', 2, 2, 1002);
+INSERT INTO TrainingSession VALUES ('05/02/2019', '10:00:00', 'annex', 2, 3, 1001);
+
+
+CREATE TABLE CookAndDineEvent (
+ date		DATE,
+ time		TIME,
+ grade		CHAR(1) 	CHECK(grade IN('A','B','C','D','E','F')),
+ buildingName	VARCHAR(255),
+ roomNum	INTEGER,
+ studentId	INTEGER		UNIQUE,
+ PRIMARY KEY (date, time, buildingName, roomNum),
+ FOREIGN KEY (buildingName, roomNum) REFERENCES Kitchen(buildingName, roomNum),
+ FOREIGN KEY (studentId) REFERENCES Student(studentId)
+);
+
+INSERT INTO CookAndDineEvent VALUES ('06/02/2019', '18:00:00', 'A', 'annex', 1, 4);
+INSERT INTO CookAndDineEvent VALUES ('05/02/2019', '12:00:00', 'B', 'farm house', 2, 1);
+INSERT INTO CookAndDineEvent VALUES ('03/05/2019', '12:00:00', NULL, 'annex', 1, 2);
+
+
+CREATE TABLE EventAttending (
+ friendId	INTEGER,
+ date		DATE,
+ time		TIME,
+ buildingName	VARCHAR(255),
+ roomNum	INTEGER,
+ PRIMARY KEY (friendId, date, time),
+ FOREIGN KEY (date, time, buildingName, roomNum) REFERENCES CookAndDineEvent(date, time, buildingName, roomNum),
+ FOREIGN KEY (friendId) REFERENCES Friend(friendId)
+);
+
+INSERT INTO EventAttending VALUES (2, '03/05/2019', '12:00:00', 'annex', 1);
+INSERT INTO EventAttending VALUES (4, '03/05/2019', '12:00:00', 'annex', 1);
+INSERT INTO EventAttending VALUES (1, '05/02/2019', '12:00:00', 'farm house', 2);
+INSERT INTO EventAttending VALUES (2, '06/02/2019', '18:00:00', 'annex', 1);
+INSERT INTO EventAttending VALUES (3, '06/02/2019', '18:00:00', 'annex', 1);
+
+/*
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+Task 2
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+*/
+
+-- 2.1)
+ SELECT Chef.name, Chef.phoneNum, TrainingSession.date, TrainingSession.time
+ FROM Chef
+ 	JOIN TrainingSession
+ 		ON Chef.empId = TrainingSession.empId
+ ORDER BY Chef.name, TrainingSession.date, TrainingSession.time ASC;
+
+-- 2.2)
+ SELECT COUNT(*) AS numOfSes, Student.name, Student.studentId
+ FROM Student
+ 	JOIN TrainingSession
+ 		ON Student.studentId = TrainingSession.studentId
+ WHERE TrainingSession.buildingName = 'farm house'
+ GROUP BY Student.studentId;
+ 
+-- 2.3)
+ SELECT Student.name AS studentName, Friend.dietaryConstraints, CookAndDineEvent.date,CookAndDineEvent.time
+ FROM Friend
+	JOIN EventAttending
+ 		ON Friend.friendId = EventAttending.friendId
+	JOIN CookAndDineEvent
+ 		ON EventAttending.date = CookAndDineEvent.date AND EventAttending.time = CookAndDineEvent.time AND EventAttending.buildingName = CookAndDineEvent.buildingName AND EventAttending.roomNum = CookAndDineEvent.roomNum
+	JOIN Student
+ 		ON CookAndDineEvent.studentId = Student.studentId
+ WHERE Friend.name = 'Yasser Crimp';
+
+-- 2.4)
+ SELECT Student.name, TrainingSession.date, TrainingSession.time
+ FROM Student
+	LEFT JOIN TrainingSession
+		ON Student.StudentId = TrainingSession.studentId
+	LEFT JOIN CookAndDineEvent
+		ON Student.StudentId = CookAndDineEvent.studentId
+ WHERE CookAndDineEvent.date IS NULL AND CookAndDineEvent.time IS NULL AND CookAndDineEvent.buildingName IS NULL AND CookAndDineEvent.roomNum IS NULL;
+
+-- 2.5)
+ SELECT List.date, List.time, Student.name, Student.studentId
+ FROM Student
+	JOIN (
+	SELECT TrainingSession.date, TrainingSession.time, TrainingSession.studentId 
+ 	FROM TrainingSession
+ 	UNION ALL
+ 	SELECT CookAndDineEvent.date, CookAndDineEvent.time, CookAndDineEvent.studentId 
+ 	FROM CookAndDineEvent) AS List 
+		ON Student.studentId = List.studentId;
+
+-- 2.6)
+UPDATE TrainingSession
+SET roomNum = 3
+FROM Chef
+WHERE TrainingSession.empId = Chef.empId AND Chef.qualification = 'certificate' AND TrainingSession.buildingName = 'farm house' AND TrainingSession.roomNum = 2;
+ 

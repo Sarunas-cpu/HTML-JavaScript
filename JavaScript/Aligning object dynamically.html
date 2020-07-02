@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Question 2</title>
+<style>
+div {
+	background-color: red;
+	width: 10px;
+	height: 10px;
+	border: 1px;
+}
+</style>
+<script>
+//moves tinyBox to the left side of the screen
+function moveLeft() {
+	document.getElementById('tinyBox').style.margin = 'auto 0 0 0';
+}
+//moves tinyBox to the centre of the screen
+function moveCentre() {
+	document.getElementById('tinyBox').style.margin = 'auto';
+}
+//moves tinyBox to the right of the screen
+function moveRight() {
+	document.getElementById('tinyBox').style.margin = '0 0 0 auto';
+}
+</script>
+</head>
+<body>
+<form id="form">
+	<!-- left radio button -->
+	<input id="Left" type="radio" name="position" onClick="moveLeft()" checked="checked"/>
+		<label for="Left">Left</label>
+	<!-- centre radio button -->
+	<input id="Centre" type="radio" name="position" onClick="moveCentre()"/>
+		<label for="Centre">Centre</label>
+	<!-- right radio button -->
+	<input id="Right" type="radio" name="position" onClick="moveRight()"/>
+		<label for="Right">Right</label>	
+</form>
+<div id="tinyBox"></div>
+
+</body>
+</html>
